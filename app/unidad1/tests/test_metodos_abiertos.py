@@ -1,5 +1,8 @@
 from math import sqrt
 
+import pytest
+
+from app.utils.math import ImageNotReal
 from app.utils.parser import parse_expression
 from app.unidad1.utils import Tolerance
 from app.unidad1.raices_de_funciones.metodos_abiertos import (
@@ -92,3 +95,33 @@ def test_tangente_converge_con_derivada_numerica():
     assert resultado.converge
     assert resultado.raiz is not None
     assert abs(resultado.raiz - sqrt(2)) < 1e-3
+
+
+def test_tangente_error_si_f_no_es_real():
+    with pytest.raises(ImageNotReal) as captured:
+        calcular_metodo_abierto(
+            MetodoAbiertoParams(
+                func=parse_expression("sqrt(x)"),
+                metodo=MetodoAbierto.TANGENTE,
+                max_iteraciones=100,
+                tolerancia=Tolerance(0.0001),
+                xi=-1.0,
+            ),
+        )
+
+    assert captured.value.details["x"] == -1.0
+
+
+def test_tangente_error_si_iterado_no_es_real():
+    with pytest.raises(ImageNotReal) as captured:
+        calcular_metodo_abierto(
+            MetodoAbiertoParams(
+                func=parse_expression("sqrt(x)"),
+                metodo=MetodoAbierto.TANGENTE,
+                max_iteraciones=100,
+                tolerancia=Tolerance(0.0001),
+                xi=2.1,
+            ),
+        )
+
+    assert captured.value.details["x"] != 2.1

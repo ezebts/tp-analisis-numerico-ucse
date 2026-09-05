@@ -1,5 +1,5 @@
-from dataclasses import dataclass
 from math import floor, log10
+from dataclasses import dataclass
 
 from app.utils.exceptions import Error, ValidationError
 

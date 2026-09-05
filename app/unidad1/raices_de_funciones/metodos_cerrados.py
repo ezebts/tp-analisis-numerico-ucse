@@ -8,8 +8,9 @@ from dataclasses import dataclass
 
 from sympy import Expr, lambdify, symbols
 
-from app.unidad1.utils import Interval, Tolerance
+from app.utils.math import evalr
 from app.utils.exceptions import ValidationError, Error
+from app.unidad1.utils import Interval, Tolerance
 from app.unidad1.exceptions import IntervalDoesntCrossZero
 
 
@@ -72,8 +73,8 @@ def calcular_metodo_cerrado(params: MetodoCerradoParams) -> MetodoCerradoResult:
     error = 0.0
 
     for i in range(1, params.max_iteraciones + 1):
-        fxi = float(f(xi))
-        fxd = float(f(xd))
+        fxi = evalr(f, xi)
+        fxd = evalr(f, xd)
 
         if fxi == 0 or fxd == 0:
             return MetodoCerradoResult(
@@ -91,7 +92,8 @@ def calcular_metodo_cerrado(params: MetodoCerradoParams) -> MetodoCerradoResult:
             raise IntervalDoesntCrossZero(params.interval)
 
         xr = calcular_xr(xi, xd, fxi, fxd)
-        fxr = float(f(xr))
+
+        fxr = evalr(f, xr)
 
         if xr != 0:
             error = abs(xr - xant) / abs(xr)

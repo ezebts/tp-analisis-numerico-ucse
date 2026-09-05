@@ -49,3 +49,13 @@ def single_variable(d: dict) -> str:
         "La función debe depender de una sola variable (x). "
         f"Variables encontradas: {nombres}."
     )
+
+
+@error_mapping
+def ImageNotReal(d: dict) -> str:
+    x = d.get("x")
+    extra = f" en x = {x}" if x is not None else ""
+    return (
+        f"f(x) no es un número real{extra}. "
+        "Use un punto donde la función esté definida."
+    )

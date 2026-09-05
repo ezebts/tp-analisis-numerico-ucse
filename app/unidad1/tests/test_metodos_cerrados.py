@@ -1,5 +1,8 @@
 from math import sqrt
 
+import pytest
+
+from app.utils.math import ImageNotReal
 from app.utils.parser import parse_expression
 from app.unidad1.utils import Interval, Tolerance
 from app.unidad1.raices_de_funciones.metodos_cerrados import (
@@ -73,3 +76,18 @@ def test_regla_falsa_diverge():
     assert not resultado.converge
     assert resultado.raiz is None
     assert resultado.iteraciones == 2
+
+
+def test_biseccion_error_si_f_no_es_real():
+    with pytest.raises(ImageNotReal) as captured:
+        calcular_metodo_cerrado(
+            MetodoCerradoParams(
+                func=parse_expression("sqrt(x)"),
+                metodo=MetodoCerrado.BISECCION,
+                max_iteraciones=100,
+                tolerancia=Tolerance(0.0001),
+                interval=Interval(-1.0, 1.0),
+            ),
+        )
+
+    assert captured.value.details["x"] == -1.0

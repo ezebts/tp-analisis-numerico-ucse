@@ -5,15 +5,13 @@ Implementación de los metodos abiertos tangente y secante.
 from enum import StrEnum
 from typing import Optional
 from dataclasses import dataclass
-from math import isfinite, isnan
+from math import isnan
 
-from sympy import Expr, diff, lambdify, symbols
+from sympy import Expr, lambdify, symbols
 
+from app.utils.math import derivada_numerica, derivada_simbolica, evalr
 from app.unidad1.utils import Tolerance
 from app.utils.exceptions import ValidationError, Error
-
-
-PASO_DERIVADA = 0.0001
 
 
 class MetodoAbierto(StrEnum):
@@ -56,30 +54,6 @@ class MetodoAbiertoResult:
     raiz: Optional[float]
 
 
-def derivada_simbolica(func: Expr):
-    try:
-        return lambdify(symbols("x"), diff(func, symbols("x")), modules="math")
-    except (ValueError, TypeError, OverflowError, ZeroDivisionError, NotImplementedError):
-        return None
-
-
-def derivada_numerica(xi, fxi, f, df) -> float:
-    """ Dx(xi) si se puede; si no, (f(xi + h) - f(xi)) / h. """
-    
-    if df is not None:
-        try:
-            derivada = float(df(xi))
-            if isfinite(derivada):
-                return derivada
-        except (ValueError, TypeError, OverflowError, ZeroDivisionError):
-            pass
-    
-    try: # Aproximamos
-        return (float(f(xi + PASO_DERIVADA)) - fxi) / PASO_DERIVADA
-    except (ValueError, TypeError, OverflowError, ZeroDivisionError):
-        return float("nan")
-
-
 def tangente(func: Expr, tolerancia: Tolerance):
     """ Estrategia de la tangente (Newton-Raphson). """
     f = lambdify(symbols("x"), func, modules="math")
@@ -110,7 +84,7 @@ def calcular_metodo_abierto(params: MetodoAbiertoParams) -> MetodoAbiertoResult:
     error = 0.0
     xr = xi
 
-    fxi = float(f(xi))
+    fxi = evalr(f, xi)
     if params.tolerancia.acepts(fxi):
         return MetodoAbiertoResult(
             metodo=params.metodo,
@@ -125,7 +99,9 @@ def calcular_metodo_abierto(params: MetodoAbiertoParams) -> MetodoAbiertoResult:
         )
 
     if params.metodo == MetodoAbierto.SECANTE:
-        fxd = float(f(xd))
+
+        fxd = evalr(f, xd)
+
         if params.tolerancia.acepts(fxd):
             return MetodoAbiertoResult(
                 metodo=params.metodo,
@@ -140,8 +116,8 @@ def calcular_metodo_abierto(params: MetodoAbiertoParams) -> MetodoAbiertoResult:
             )
 
     for i in range(1, params.max_iteraciones + 1):
-        fxi = float(f(xi))
-        fxd = float(f(xd)) if xd is not None else fxi
+        fxi = evalr(f, xi)
+        fxd = evalr(f, xd) if xd is not None else fxi
 
         try:
             xr = calcular_xr(xi, xd if xd is not None else xi, fxi, fxd)
@@ -161,7 +137,7 @@ def calcular_metodo_abierto(params: MetodoAbiertoParams) -> MetodoAbiertoResult:
                 raiz=None,
             )
 
-        fxr = float(f(xr))
+        fxr = evalr(f, xr)
 
         if xr != 0:
             error = abs(xr - xant) / abs(xr)
