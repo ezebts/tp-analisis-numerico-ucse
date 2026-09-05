@@ -1,0 +1,62 @@
+{% if resultado %}
+{% set nombres_metodo = {"biseccion": "Bisección", "regla_falsa": "Regla Falsa", "tangente": "Tangente", "secante": "Secante"} %}
+<dl class="space-y-3 text-sm">
+  <div>
+    <dt class="text-slate-500">Función utilizada</dt>
+    <dd class="mt-1 rounded-md border border-slate-200 bg-slate-50 px-3 py-2 font-mono text-slate-900">{{ funcion }}</dd>
+  </div>
+  <div>
+    <dt class="text-slate-500">Método utilizado</dt>
+    <dd class="mt-1 rounded-md border border-slate-200 bg-slate-50 px-3 py-2 text-slate-900">{{ nombres_metodo.get(metodo.value, "Unknown") }}</dd>
+  </div>
+  <div>
+    <dt class="text-slate-500">Iteraciones realizadas</dt>
+    <dd class="mt-1 rounded-md border border-slate-200 bg-slate-50 px-3 py-2 text-slate-900">{{ resultado.iteraciones }} / {{ resultado.max_iteraciones }}</dd>
+  </div>
+  <div>
+    <dt class="text-slate-500">Tolerancia utilizada</dt>
+    <dd class="mt-1 rounded-md border border-slate-200 bg-slate-50 px-3 py-2 text-slate-900">{{ resultado.tolerancia }}</dd>
+  </div>
+  <div>
+    <dt class="text-slate-500">
+      {% if resultado.interval is defined %}
+      Intervalo utilizado
+      {% elif metodo.value == "tangente" %}
+      Valor inicial
+      {% else %}
+      Puntos iniciales
+      {% endif %}
+    </dt>
+    <dd class="mt-1 rounded-md border border-slate-200 bg-slate-50 px-3 py-2 text-slate-900">
+      {% if resultado.interval is defined %}
+      [{{ resultado.interval.xi | format_decimal(resultado.tolerancia.places) }}, {{ resultado.interval.xd | format_decimal(resultado.tolerancia.places) }}]
+      {% elif metodo.value == "tangente" %}
+      {{ resultado.xi | format_decimal(resultado.tolerancia.places) }}
+      {% else %}
+      [{{ resultado.xi | format_decimal(resultado.tolerancia.places) }}, {{ resultado.xd | format_decimal(resultado.tolerancia.places) }}]
+      {% endif %}
+    </dd>
+  </div>
+  <div>
+    <dt class="text-slate-500">¿Converge?</dt>
+    <dd class="mt-1 rounded-md border border-slate-200 bg-slate-50 px-3 py-2 text-slate-900">
+      {% if resultado.converge %}Sí{% else %}No{% endif %}
+    </dd>
+  </div>
+  <div>
+    <dt class="text-slate-500">Raíz</dt>
+    <dd class="mt-1 rounded-md border border-slate-200 bg-slate-50 px-3 py-2 text-slate-900">{{ resultado.raiz | format_decimal(resultado.tolerancia.places) }}</dd>
+  </div>
+  <div>
+    <dt class="text-slate-500">Error</dt>
+    <dd class="mt-1 rounded-md border border-slate-200 bg-slate-50 px-3 py-2 text-slate-900">{{ resultado.error | format_decimal(resultado.tolerancia.places) }}</dd>
+  </div>
+</dl>
+{% if not resultado.converge %}
+<p class="mt-4 rounded-md border border-amber-200 bg-amber-50 px-3 py-2 text-sm text-amber-800" role="status">
+  El método no convergió en {{ resultado.max_iteraciones }} iteraciones.
+</p>
+{% endif %}
+{% else %}
+<p class="text-sm text-slate-500">Los resultados aparecerán al calcular.</p>
+{% endif %}

@@ -1,0 +1,143 @@
+{% macro fila(slot, fields) %}
+<div>
+  {{ caller() }}
+  <div id="errores-{{ slot }}" class="empty:hidden">{% with fields=fields %}{% include "partials/errores_campos.html" %}{% endwith %}</div>
+</div>
+{% endmacro %}
+
+<form
+  id="formulario"
+  class="mt-4 space-y-4"
+  hx-post="{{ url_for('unidad1_calcular') }}"
+  hx-swap="none"
+  hx-indicator="#indicador-calculo"
+  {% if swap_form %}hx-swap-oob="outerHTML"{% endif %}
+>
+  {% call fila("funcion", ["funcion"]) %}
+  <label class="block">
+    <span class="text-sm font-medium text-slate-700">Función</span>
+    <input
+      name="funcion"
+      value="{{ valores.funcion }}"
+      required
+      class="mt-1 w-full rounded-md border border-slate-300 px-3 py-2 text-sm text-slate-900 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+    />
+  </label>
+  {% endcall %}
+
+  {% call fila("metodo", ["metodo"]) %}
+  <label class="block">
+    <span class="text-sm font-medium text-slate-700">Método</span>
+    <select
+      name="metodo"
+      class="mt-1 w-full rounded-md border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+    >
+      {% set nombres_metodo = {"biseccion": "Bisección", "regla_falsa": "Regla Falsa", "tangente": "Tangente", "secante": "Secante"} %}
+      {% for metodo in metodos %}
+      <option value="{{ metodo.value }}" {% if valores.metodo == metodo %}selected{% endif %}>{{ nombres_metodo.get(metodo.value, "Unknown") }}</option>
+      {% endfor %}
+    </select>
+  </label>
+  {% endcall %}
+
+  {% call fila("iteraciones", ["iteraciones"]) %}
+  <label class="block">
+    <span class="text-sm font-medium text-slate-700">Iteraciones</span>
+    <input
+      name="iteraciones"
+      type="number"
+      min="1"
+      step="1"
+      value="{{ valores.iteraciones }}"
+      required
+      class="mt-1 w-full rounded-md border border-slate-300 px-3 py-2 text-sm text-slate-900 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+    />
+  </label>
+  {% endcall %}
+
+  {% call fila("tolerancia", ["tolerancia"]) %}
+  <label class="block">
+    <span class="text-sm font-medium text-slate-700">Tolerancia</span>
+    <input
+      name="tolerancia"
+      value="{{ valores.tolerancia }}"
+      required
+      class="mt-1 w-full rounded-md border border-slate-300 px-3 py-2 text-sm text-slate-900 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+    />
+  </label>
+  {% endcall %}
+
+  {% call fila("intervalo", ["xi", "xd"]) %}
+  <fieldset>
+    <legend class="text-sm font-medium text-slate-700">
+      <span data-leyenda-intervalo>Intervalo</span>
+      <span data-leyenda-valor-inicial>Valor inicial</span>
+    </legend>
+    <div data-intervalo-campos class="mt-1 grid grid-cols-2 gap-3">
+      <label class="block">
+        <span class="text-xs text-slate-500">xi</span>
+        <input
+          name="xi"
+          value="{{ valores.xi }}"
+          required
+          class="mt-1 w-full rounded-md border border-slate-300 px-3 py-2 text-sm text-slate-900 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+        />
+      </label>
+      <label data-campo-xd class="block">
+        <span class="text-xs text-slate-500">xd</span>
+        <input
+          name="xd"
+          value="{{ valores.xd }}"
+          required
+          class="mt-1 w-full rounded-md border border-slate-300 px-3 py-2 text-sm text-slate-900 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+        />
+      </label>
+    </div>
+  </fieldset>
+  {% endcall %}
+
+  {% call fila("escala", ["xmin", "xmax"]) %}
+  <fieldset>
+    <legend class="text-sm font-medium text-slate-700">Escala de x (gráfico)</legend>
+    <div class="mt-1 grid grid-cols-2 gap-3">
+      <label class="block">
+        <span class="text-xs text-slate-500">xmin</span>
+        <input
+          name="xmin"
+          value="{{ valores.xmin }}"
+          required
+          class="mt-1 w-full rounded-md border border-slate-300 px-3 py-2 text-sm text-slate-900 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+        />
+      </label>
+      <label class="block">
+        <span class="text-xs text-slate-500">xmax</span>
+        <input
+          name="xmax"
+          value="{{ valores.xmax }}"
+          required
+          class="mt-1 w-full rounded-md border border-slate-300 px-3 py-2 text-sm text-slate-900 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+        />
+      </label>
+    </div>
+  </fieldset>
+  {% endcall %}
+
+  <div id="errores-form" class="empty:hidden">
+    {% set general = (errores | default(none)) | all_errors %}
+    {% if general %}
+    <div class="space-y-2">
+      {% for error in general %}
+      <p class="rounded-md border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-700" role="alert">{{ error | error_message }}</p>
+      {% endfor %}
+    </div>
+    {% endif %}
+  </div>
+
+  <button
+    type="submit"
+    class="relative flex w-full items-center justify-center rounded-md bg-blue-600 px-4 py-2.5 text-sm font-medium text-white transition hover:bg-blue-700 disabled:opacity-60"
+  >
+    <span>Calcular</span>
+    <span id="indicador-calculo" class="htmx-indicator pointer-events-none absolute inset-y-0 right-4 flex items-center text-blue-100">Calculando…</span>
+  </button>
+</form>

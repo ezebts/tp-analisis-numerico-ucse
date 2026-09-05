@@ -1,0 +1,47 @@
+{% extends "base.html" %}
+
+{% block title %}Unidad 1 — Raíces de funciones{% endblock %}
+
+{% block extra_head %}
+<script src="{{ url_for('static', path='vendor/htmx.min.js') }}"></script>
+<script src="{{ url_for('static', path='vendor/chart.umd.min.js') }}"></script>
+{% endblock %}
+
+{% block content %}
+<div class="mx-auto max-w-[90rem] px-4 py-8">
+  <header class="border-b border-slate-200 pb-4 text-center">
+    <h1 class="text-3xl font-bold tracking-tight text-slate-900">Análisis Numérico</h1>
+    <p class="mt-1 text-lg text-slate-600">Unidad 1 – Raíces de funciones</p>
+  </header>
+
+  <a href="{{ url_for('index') }}" class="mt-4 inline-flex text-sm font-medium text-blue-600 hover:text-blue-700">
+    ← Volver
+  </a>
+
+  <div class="mt-6 flex flex-col items-stretch gap-4 lg:flex-row lg:items-stretch lg:justify-center">
+    <section class="flex w-full shrink-0 flex-col rounded-xl border border-slate-200 bg-white p-4 shadow-sm lg:w-96">
+      <h2 class="text-lg font-semibold text-slate-900">Ingreso de datos</h2>
+      {% include "partials/formulario.html" %}
+    </section>
+
+    <section class="mx-auto flex size-[32rem] shrink-0 flex-col overflow-hidden rounded-xl border border-slate-200 bg-white p-4 shadow-sm">
+      <h2 class="shrink-0 text-lg font-semibold text-slate-900">Gráfico</h2>
+      <div id="grafico" class="relative mt-4 min-h-0 flex-1 overflow-hidden">
+        {% include "partials/grafico.html" %}
+      </div>
+    </section>
+
+    <section class="flex w-full shrink-0 flex-col self-stretch rounded-xl border border-slate-200 bg-white p-4 shadow-sm lg:w-96">
+      <h2 class="shrink-0 text-lg font-semibold text-slate-900">Resultados</h2>
+      <div id="resultados" class="mt-4 min-h-0 flex-1 overflow-y-auto">
+        {% include "partials/resultados.html" %}
+      </div>
+    </section>
+  </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="{{ url_for('static', path='js/formulario.js') }}"></script>
+<script src="{{ url_for('static', path='js/grafico.js') }}"></script>
+{% endblock %}

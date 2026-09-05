@@ -1,0 +1,5 @@
+{% for field in fields %}
+  {% for error in (errores | default(none)) | field_errors(field) %}
+  <p class="mt-1 rounded-md border border-red-200 bg-red-50 px-3 py-1.5 text-sm text-red-700" role="alert">{{ error | error_message }}</p>
+  {% endfor %}
+{% endfor %}

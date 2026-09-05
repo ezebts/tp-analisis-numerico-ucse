@@ -1,0 +1,13 @@
+{% if grafico %}
+<div
+  data-grafico
+  data-xs="{{ grafico.xs | tojson }}"
+  data-ys="{{ grafico.ys | tojson }}"
+  data-raiz="{{ grafico.raiz if grafico.raiz is not none else '' }}"
+  data-places="{{ resultado.tolerancia.places if resultado else 4 }}"
+>
+  <canvas aria-label="Gráfico de la función"></canvas>
+</div>
+{% else %}
+<p class="text-sm text-slate-500">El gráfico aparecerá al calcular.</p>
+{% endif %}
