@@ -1,6 +1,50 @@
 (() => {
   let chart;
 
+  const pasoCuadricula = (span, marcas = 8) => {
+    const crudo = Math.abs(span) / marcas || 1;
+    const mag = 10 ** Math.floor(Math.log10(crudo));
+    const resto = crudo / mag;
+    const nice = resto >= 5 ? 5 : resto >= 2 ? 2 : 1;
+    return nice * mag;
+  };
+
+  const colorEje = (ctx) => (ctx.tick.value === 0 ? "#94a3b8" : "#e2e8f0");
+  const grosorEje = (ctx) => (ctx.tick.value === 0 ? 1.5 : 1);
+
+  const escalaUnoAUno = {
+    id: "escalaUnoAUno",
+    afterLayout(chart) {
+      if (chart.$ajustandoEscala) {
+        return;
+      }
+      const x = chart.scales.x;
+      const y = chart.scales.y;
+      if (!x?.width || !y?.height) {
+        return;
+      }
+      const xSpan = x.max - x.min;
+      if (!(xSpan > 0)) {
+        return;
+      }
+      const unidad = xSpan / x.width;
+      const ySpan = unidad * y.height;
+      const yMin = -ySpan / 2;
+      const yMax = ySpan / 2;
+      if (
+        Math.abs((y.options.min ?? y.min) - yMin) < unidad * 0.01 &&
+        Math.abs((y.options.max ?? y.max) - yMax) < unidad * 0.01
+      ) {
+        return;
+      }
+      y.options.min = yMin;
+      y.options.max = yMax;
+      chart.$ajustandoEscala = true;
+      chart.update("none");
+      chart.$ajustandoEscala = false;
+    },
+  };
+
   const formatDecimal = (value, places = 4) => {
     if (value == null || Number.isNaN(value)) {
       return "—";
@@ -26,6 +70,10 @@
     const places = Number.isInteger(placesRaw) && placesRaw >= 0 ? placesRaw : 4;
 
     const puntos = xs.map((x, i) => ({ x, y: ys[i] })).filter((punto) => punto.y !== null);
+    const xMin = xs.length ? xs[0] : -1;
+    const xMax = xs.length ? xs[xs.length - 1] : 1;
+    const xSpan = xMax - xMin || 2;
+    const paso = pasoCuadricula(xSpan);
 
     if (chart) {
       chart.destroy();
@@ -57,6 +105,7 @@
     chart = new Chart(canvas, {
       type: "line",
       data: { datasets },
+      plugins: [escalaUnoAUno],
       options: {
         responsive: true,
         maintainAspectRatio: false,
@@ -82,15 +131,21 @@
         scales: {
           x: {
             type: "linear",
-            min: xs.length ? xs[0] : undefined,
-            max: xs.length ? xs[xs.length - 1] : undefined,
+            min: xMin,
+            max: xMax,
             title: { display: true, text: "x" },
-            grid: { color: "#e2e8f0" },
+            ticks: { stepSize: paso, color: "#64748b" },
+            grid: { color: colorEje, lineWidth: grosorEje },
+            border: { display: false },
           },
           y: {
             type: "linear",
+            min: -xSpan / 2,
+            max: xSpan / 2,
             title: { display: true, text: "f(x)" },
-            grid: { color: "#e2e8f0" },
+            ticks: { stepSize: paso, color: "#64748b" },
+            grid: { color: colorEje, lineWidth: grosorEje },
+            border: { display: false },
           },
         },
       },

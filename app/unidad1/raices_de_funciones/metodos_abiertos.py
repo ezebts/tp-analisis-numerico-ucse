@@ -33,17 +33,7 @@ class MetodoAbiertoParams:
     def get_metodo(self):
 
         if self.metodo == MetodoAbierto.TANGENTE:
-            x = symbols("x")
-            f = lambdify(x, self.func, modules="math")
-            df = lambdify(x, diff(self.func, x), modules="math")
-
-            def calcular_xr(xi, xd, fxi, fxd):
-                derivada = derivada_tangente(xi, fxi, f, df)
-                if isnan(derivada) or abs(derivada) < self.tolerancia.value:
-                    return float("nan")
-                return tangente(xi, fxi, derivada)
-
-            return calcular_xr
+            return tangente(self.func, self.tolerancia)
 
         if self.metodo == MetodoAbierto.SECANTE:
             return secante
@@ -66,25 +56,42 @@ class MetodoAbiertoResult:
     raiz: Optional[float]
 
 
-def derivada_tangente(xi, fxi, f, df) -> float:
+def derivada_simbolica(func: Expr):
+    try:
+        return lambdify(symbols("x"), diff(func, symbols("x")), modules="math")
+    except (ValueError, TypeError, OverflowError, ZeroDivisionError, NotImplementedError):
+        return None
+
+
+def derivada_numerica(xi, fxi, f, df) -> float:
     """ Dx(xi) si se puede; si no, (f(xi + h) - f(xi)) / h. """
     
-    try:
-        derivada = float(df(xi))
-        if isfinite(derivada):
-            return derivada
-    except (ValueError, TypeError, OverflowError, ZeroDivisionError):
-        pass
+    if df is not None:
+        try:
+            derivada = float(df(xi))
+            if isfinite(derivada):
+                return derivada
+        except (ValueError, TypeError, OverflowError, ZeroDivisionError):
+            pass
     
-    try:
+    try: # Aproximamos
         return (float(f(xi + PASO_DERIVADA)) - fxi) / PASO_DERIVADA
     except (ValueError, TypeError, OverflowError, ZeroDivisionError):
         return float("nan")
 
 
-def tangente(xi, fxi, derivada) -> float:
+def tangente(func: Expr, tolerancia: Tolerance):
     """ Estrategia de la tangente (Newton-Raphson). """
-    return xi - fxi / derivada
+    f = lambdify(symbols("x"), func, modules="math")
+    df = derivada_simbolica(func)
+
+    def calcular_xr(xi, xd, fxi, fxd):
+        derivada = derivada_numerica(xi, fxi, f, df)
+        if isnan(derivada) or abs(derivada) < tolerancia.value:
+            return float("nan")
+        return xi - fxi / derivada
+
+    return calcular_xr
 
 
 def secante(xi, xd, fxi, fxd) -> float:

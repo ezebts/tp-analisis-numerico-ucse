@@ -1,3 +1,4 @@
+from logging import getLogger
 from typing import Annotated
 
 from fastapi import APIRouter, Form, Request
@@ -6,6 +7,7 @@ from fastapi.responses import HTMLResponse
 from app.utils.graph import Graph
 from app.utils.parser import parse_expression
 from app.utils.templates import load_templates
+from app.utils.exceptions import Error
 
 from app.unidad1.forms import CalcularForm, MetodoAbierto, MetodoCerrado
 from app.unidad1.utils import Interval, Tolerance
@@ -19,6 +21,8 @@ from app.unidad1.raices_de_funciones.metodos_cerrados import (
     calcular_metodo_cerrado,
 )
 
+
+logger = getLogger(__name__)
 
 view = load_templates(__file__)
 
@@ -39,8 +43,8 @@ async def index(request: Request):
                 "tolerancia": "0.0001",
                 "xi": "1.0",
                 "xd": "2.0",
-                "xmin": "-2.0",
-                "xmax": "4.0",
+                "xmin": "-10.0",
+                "xmax": "10.0",
             },
         },
     )
@@ -105,7 +109,11 @@ async def calcular(
         
         ctx["resultado"] = resultado
     
+    except Error as exc:
+        ctx["errores"] = exc
+    
     except Exception as exc:
+        logger.exception("Error al calcular")
         ctx["errores"] = exc
     
     return view.TemplateResponse(request, "partials/calculo.html", ctx)
