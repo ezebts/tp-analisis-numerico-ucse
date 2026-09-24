@@ -12,7 +12,7 @@ def errors_from_pydantic(exc: PydanticValidationError | RequestValidationError) 
     for err in exc.errors():
         ptype = err["type"]
         ctx = dict(err.get("ctx") or {})
-        field = err["loc"][-1] if err.get("loc") else None
+        field = err["loc"][-1] if err.get("loc") else ctx.get("field")
         details = {"field": field, "value": err.get("input"), **ctx}
 
         if ptype in {"required", "missing"}:

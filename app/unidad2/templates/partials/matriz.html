@@ -1,0 +1,38 @@
+<div id="matriz" class="mt-1 overflow-x-auto" {% if swap_matriz %}hx-swap-oob="outerHTML"{% endif %}>
+  <table class="w-full">
+    <thead>
+      <tr>
+        {% for j in range(dimension) %}
+        <th class="px-1 pb-1 text-xs font-medium text-slate-500">x{{ j + 1 }}</th>
+        {% endfor %}
+        <th></th>
+        <th class="px-1 pb-1 text-xs font-medium text-slate-500">TI</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for i in range(dimension) %}
+      <tr>
+        {% for j in range(dimension) %}
+        <td class="p-1">
+          <input
+            name="matriz"
+            value="{{ matriz[i][j] | format_decimal }}"
+            required
+            class="w-full rounded-md border border-slate-300 px-3 py-2 text-sm text-slate-900 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+          />
+        </td>
+        {% endfor %}
+        <td class="px-2 text-sm font-medium text-slate-700">=</td>
+        <td class="p-1">
+          <input
+            name="matriz"
+            value="{{ matriz[i][dimension] | format_decimal }}"
+            required
+            class="w-full rounded-md border border-slate-300 px-3 py-2 text-sm text-slate-900 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+          />
+        </td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>

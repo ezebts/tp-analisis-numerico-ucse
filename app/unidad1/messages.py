@@ -10,8 +10,15 @@ def invalid_interval(d: dict) -> str:
 
 @error_mapping
 def out_of_range(d: dict) -> str:
+    field = d.get("field")
+    if field == "dimension":
+        etiqueta = "La dimensión"
+    elif field == "tolerancia":
+        etiqueta = "La tolerancia"
+    else:
+        etiqueta = "El valor"
     return (
-        f"La tolerancia debe estar entre {d.get('min')} y {d.get('max')} "
+        f"{etiqueta} debe estar entre {d.get('min')} y {d.get('max')} "
         f"(recibido {d.get('value')})."
     )
 

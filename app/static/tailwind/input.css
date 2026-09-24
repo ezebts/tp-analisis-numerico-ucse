@@ -32,6 +32,10 @@ form:has(select[name="metodo"] option[value="tangente"]:checked) [data-intervalo
   grid-template-columns: 1fr;
 }
 
+form:has(select[name="metodo"] option[value="gauss_jordan"]:checked) [data-campo-iterativo] {
+  display: none;
+}
+
 [data-grafico] {
   position: relative;
   width: 100%;

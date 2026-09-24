@@ -4,6 +4,8 @@ from app.utils.templates import error_mapping
 @error_mapping
 def required(d: dict) -> str:
     field = d.get("field")
+    if field == "matriz":
+        return "Complete todos los coeficientes de la matriz."
     return f"Complete el campo {field}." if field else "Complete todos los campos."
 
 
@@ -17,6 +19,9 @@ def invalid_number(d: dict) -> str:
     field = d.get("field")
     value = d.get("value")
     
+    if field == "matriz":
+        field = "la matriz"
+
     if not field:
         return "Ingrese un número válido."
     
