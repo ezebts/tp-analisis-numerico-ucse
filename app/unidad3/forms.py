@@ -19,10 +19,12 @@ class PuntosForm(BaseModel):
     metodo: MetodoAjuste
     tolerancia: float
     grado: int = Field(default=GRADO_INICIAL, ge=GRADO_MIN, le=GRADO_MAX)
+    xmin: float
+    xmax: float
     xs: list[float]
     ys: list[float]
 
-    @field_validator("metodo", "tolerancia", "grado", "xs", "ys", mode="before")
+    @field_validator("metodo", "tolerancia", "grado", "xmin", "xmax", "xs", "ys", mode="before")
     @classmethod
     def normalize(cls, value: object, info: ValidationInfo) -> object:
         return _normalize(value, info.field_name)
@@ -110,7 +112,7 @@ def _normalize(value: object, field_name: str | None) -> object:
         return value
 
     texto = value.strip()
-    if field_name in {"tolerancia", "indice", "grado"}:
+    if field_name in {"tolerancia", "indice", "grado", "xmin", "xmax"}:
         texto = texto.replace(",", ".")
 
     if not texto:

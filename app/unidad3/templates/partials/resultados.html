@@ -1,5 +1,5 @@
 {% if resultado %}
-<dl class="space-y-3 text-sm">
+<dl class="shrink-0 space-y-3 text-sm">
   <div>
     <dt class="text-slate-500">Función obtenida</dt>
     <dd class="mt-1 rounded-md border border-slate-200 bg-slate-50 px-3 py-2 text-slate-900">{{ resultado.funcion }}</dd>
@@ -16,21 +16,16 @@
   </div>
 </dl>
 
-<div class="mt-4 flex flex-col gap-4 sm:flex-row sm:items-stretch">
-  <div class="shrink-0 sm:w-40">
-    <p class="text-xs font-medium text-slate-500">Puntos ingresados</p>
-    <ul class="mt-2 space-y-1 text-sm text-slate-800">
-      {% for x, y in resultado.puntos %}
-      <li>P{{ loop.index }} ({{ x | format_decimal }}, {{ y | format_decimal }})</li>
-      {% endfor %}
-    </ul>
-  </div>
-  <div class="relative h-72 min-h-72 w-full min-w-0 sm:flex-1">
-    {% include "partials/grafico.html" %}
-  </div>
+<div data-lienzo class="relative mt-4 w-full min-h-0 max-lg:aspect-square lg:flex-1">
+  {% include "partials/grafico.html" %}
 </div>
 
 {% include "partials/modificacion.html" %}
+{% elif grafico %}
+<div data-lienzo class="relative w-full min-h-0 max-lg:aspect-square lg:flex-1">
+  {% include "partials/grafico.html" %}
+</div>
+<p class="mt-4 shrink-0 text-sm text-slate-500">Los resultados aparecerán al calcular.</p>
 {% else %}
 <p class="text-sm text-slate-500">Los resultados aparecerán al calcular.</p>
 {% endif %}

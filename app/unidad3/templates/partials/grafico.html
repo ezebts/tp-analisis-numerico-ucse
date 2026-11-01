@@ -1,13 +1,5 @@
 {% if grafico %}
-<div
-  data-ajuste
-  data-puntos-x="{{ grafico.puntos_x | tojson }}"
-  data-puntos-y="{{ grafico.puntos_y | tojson }}"
-  data-xs="{{ grafico.xs | tojson }}"
-  data-ys="{{ grafico.ys | tojson }}"
->
-  <canvas aria-label="Gráfico del ajuste"></canvas>
-</div>
+{% include "partials/grafico_canvas.html" %}
 {% else %}
 <p class="text-sm text-slate-500">El gráfico aparecerá al calcular.</p>
 {% endif %}

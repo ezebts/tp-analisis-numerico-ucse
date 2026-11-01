@@ -1,6 +1,6 @@
 import math
 from collections.abc import Sequence
-from dataclasses import dataclass, field
+from dataclasses import dataclass
 from enum import StrEnum
 
 from app.utils.parser import polinomio, x
@@ -113,35 +113,3 @@ def r_funcion_modificada(
         r=r,
         aceptable=r > tolerancia,
     )
-
-
-@dataclass
-class GraficoAjuste:
-    """Puntos ingresados y muestras de la curva de ajuste, con un margen sobre X."""
-
-    puntos: Sequence[tuple[float, float]]
-    coeficientes: Sequence[float]
-    n: int = 80
-    puntos_x: list[float] = field(init=False)
-    puntos_y: list[float] = field(init=False)
-    xs: list[float] = field(init=False)
-    ys: list[float] = field(init=False)
-
-    def __post_init__(self) -> None:
-        self.puntos_x = [float(x) for x, _ in self.puntos]
-        self.puntos_y = [float(y) for _, y in self.puntos]
-        if not self.puntos_x:
-            self.xs = []
-            self.ys = []
-            return
-
-        x_min = min(self.puntos_x)
-        x_max = max(self.puntos_x)
-        span = x_max - x_min or 1.0
-        margen = span * 0.1
-        inicio = x_min - margen
-        fin = x_max + margen
-        pasos = max(self.n - 1, 1)
-        paso = (fin - inicio) / pasos
-        self.xs = [inicio + paso * i for i in range(pasos + 1)]
-        self.ys = [evaluar_polinomio(abscisa, self.coeficientes) for abscisa in self.xs]

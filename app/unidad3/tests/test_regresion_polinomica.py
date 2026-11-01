@@ -6,7 +6,8 @@ from app.unidad3.ajuste_de_curvas.regresion_polinomica import (
     resolver_sistema,
 )
 from app.unidad3.exceptions import PocosValoresX
-from app.unidad3.utils import GraficoAjuste
+from app.utils.graph import Grafico
+from app.utils.interval import Interval
 
 EJEMPLO_1 = [
     (-1.0, 6.0),
@@ -70,12 +71,9 @@ def test_pocos_valores_x_distintos():
 
 def test_grafico_evalua_polinomio():
     resultado = calcular_regresion_polinomica(_params(EJEMPLO_1, grado=2))
-    grafico = GraficoAjuste(
-        puntos=resultado.puntos,
-        coeficientes=resultado.coeficientes,
-    )
+    grafico = Grafico.de_ajuste(resultado.puntos, Interval(-2, 8), resultado.coeficientes)
 
-    assert grafico.xs[0] < min(x for x, _ in EJEMPLO_1)
+    assert grafico.xs[0] == -2
     assert grafico.ys[0] == pytest.approx(
         sum(c * grafico.xs[0] ** i for i, c in enumerate(resultado.coeficientes))
     )

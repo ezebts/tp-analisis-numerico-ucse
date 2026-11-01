@@ -3,6 +3,8 @@ import math
 import pytest
 
 from app.utils.exceptions import GradoExcedido, NoEsPolinomio, ValidationError
+from app.utils.graph import Grafico
+from app.utils.interval import Interval
 from app.utils.parser import polinomio
 from app.unidad3.ajuste_de_curvas.regresion_lineal import (
     RegresionLinealParams,
@@ -16,7 +18,6 @@ from app.unidad3.exceptions import (
 )
 from app.unidad3.utils import (
     PUNTOS_MAX,
-    GraficoAjuste,
     agregar_punto,
     quitar_punto,
     r_funcion_modificada,
@@ -132,13 +133,16 @@ def test_recta_peor_que_el_promedio():
         r_funcion_modificada(PUNTOS, "y = 10x + 10", 80, 1)
 
 
-def test_grafico_margen_sobre_x():
-    grafico = GraficoAjuste(puntos=PUNTOS, coeficientes=(2.2, 0.6))
+def test_grafico_usa_la_escala_indicada():
+    grafico = Grafico.de_ajuste(PUNTOS, Interval(0, 8), (2.2, 0.6))
 
     assert grafico.puntos_x == [1, 2, 3, 4, 5]
-    assert grafico.xs[0] < 1
-    assert grafico.xs[-1] > 5
-    assert grafico.ys[0] == pytest.approx(0.6 * grafico.xs[0] + 2.2)
+    assert grafico.xmin == 0
+    assert grafico.xmax == 8
+    assert grafico.misma_escala is True
+    assert grafico.xs[0] == 0
+    assert grafico.xs[-1] == 8
+    assert grafico.ys[0] == pytest.approx(2.2)
 
 
 def test_agregar_y_quitar_puntos():

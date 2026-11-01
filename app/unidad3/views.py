@@ -5,6 +5,8 @@ from fastapi import APIRouter, Form, Request
 from fastapi.responses import HTMLResponse
 
 from app.utils.exceptions import Error, GradoExcedido, NoEsPolinomio, ValidationError
+from app.utils.graph import Grafico
+from app.utils.interval import intervalo_valido
 from app.utils.templates import format_decimal, load_templates
 from app.unidad3.ajuste_de_curvas.regresion_lineal import (
     RegresionLinealParams,
@@ -29,7 +31,6 @@ from app.unidad3.utils import (
     PUNTOS_INICIALES,
     PUNTOS_MAX,
     PUNTOS_MIN,
-    GraficoAjuste,
     agregar_punto,
     quitar_punto,
     r_funcion_modificada,
@@ -46,12 +47,12 @@ DEFAULT_TOLERANCIA = 80.0
 ERRORES_PUNTOS = (PocosPuntos, EquisConstantes, OrdenadasConstantes, PocosValoresX)
 
 
-def _grafico_desde_resultado(resultado) -> GraficoAjuste:
+def _grafico_desde_resultado(resultado, escala):
     if hasattr(resultado, "coeficientes"):
         coeficientes = resultado.coeficientes
     else:
         coeficientes = (resultado.a0, resultado.a1)
-    return GraficoAjuste(puntos=resultado.puntos, coeficientes=coeficientes)
+    return Grafico.de_ajuste(resultado.puntos, escala, coeficientes)
 
 
 def _contexto_vista(
@@ -60,6 +61,8 @@ def _contexto_vista(
     xs: list[float],
     ys: list[float],
     tolerancia: float,
+    xmin: float,
+    xmax: float,
     grado: int = GRADO_INICIAL,
     errores=None,
     resultado=None,
@@ -84,6 +87,8 @@ def _contexto_vista(
             "metodo": metodo,
             "tolerancia": format_decimal(tolerancia),
             "grado": grado,
+            "xmin": xmin,
+            "xmax": xmax,
         },
         "funcion_modificada": funcion_modificada,
         "swap_form": swap_form,
@@ -98,6 +103,8 @@ def _contexto_inicial(**extra) -> dict:
         xs=[0.0] * PUNTOS_INICIALES,
         ys=[0.0] * PUNTOS_INICIALES,
         tolerancia=DEFAULT_TOLERANCIA,
+        xmin=-10.0,
+        xmax=10.0,
         grado=GRADO_INICIAL,
         **extra,
     )
@@ -132,6 +139,8 @@ async def agregar(
             xs=xs,
             ys=ys,
             tolerancia=input.tolerancia,
+            xmin=input.xmin,
+            xmax=input.xmax,
             grado=input.grado,
             errores=errores,
             swap_puntos=True,
@@ -153,6 +162,8 @@ async def quitar(
             xs=xs,
             ys=ys,
             tolerancia=input.tolerancia,
+            xmin=input.xmin,
+            xmax=input.xmax,
             grado=input.grado,
             swap_puntos=True,
         ),
@@ -168,6 +179,30 @@ async def limpiar(request: Request):
     )
 
 
+@router.post("/graficar", response_class=HTMLResponse, name="unidad3_graficar")
+async def graficar(
+    request: Request,
+    input: Annotated[PuntosForm, Form()],
+):
+    ctx = _contexto_vista(
+        metodo=input.metodo,
+        xs=input.xs,
+        ys=input.ys,
+        tolerancia=input.tolerancia,
+        xmin=input.xmin,
+        xmax=input.xmax,
+        grado=input.grado,
+        swap_form=True,
+    )
+    try:
+        escala = intervalo_valido(input.xmin, input.xmax, "xmin")
+    except Error as exc:
+        ctx["errores"] = exc
+    else:
+        ctx["grafico"] = Grafico.de_ajuste(input.puntos(), escala)
+    return view.TemplateResponse(request, "partials/calculo.html", ctx)
+
+
 @router.post("/calcular", response_class=HTMLResponse, name="unidad3_calcular")
 async def calcular(
     request: Request,
@@ -178,11 +213,14 @@ async def calcular(
         xs=input.xs,
         ys=input.ys,
         tolerancia=input.tolerancia,
+        xmin=input.xmin,
+        xmax=input.xmax,
         grado=input.grado,
         swap_form=True,
     )
 
     try:
+        escala = intervalo_valido(input.xmin, input.xmax, "xmin")
         if input.metodo == MetodoPolinomial.REGRESION_POLINOMIAL:
             resultado = calcular_regresion_polinomica(
                 RegresionPolinomialParams(
@@ -208,7 +246,18 @@ async def calcular(
     else:
         ctx["resultado"] = resultado
         ctx["funcion_modificada"] = resultado.funcion
-        ctx["grafico"] = _grafico_desde_resultado(resultado)
+        ctx["grafico"] = _grafico_desde_resultado(resultado, escala)
+        grado = input.grado if input.metodo == MetodoPolinomial.REGRESION_POLINOMIAL else 1
+        
+        try:
+            ctx["modificada"] = r_funcion_modificada(
+                resultado.puntos,
+                resultado.funcion,
+                input.tolerancia,
+                grado,
+            )
+        except Error:
+            logger.exception("No se pudo evaluar la función obtenida como modificación")
 
     return view.TemplateResponse(request, "partials/calculo.html", ctx)
 
@@ -223,6 +272,8 @@ async def recalcular(
         xs=input.xs,
         ys=input.ys,
         tolerancia=input.tolerancia,
+        xmin=input.xmin,
+        xmax=input.xmax,
         grado=input.grado,
         funcion_modificada=input.funcion_modificada,
         swap_modificada=True,

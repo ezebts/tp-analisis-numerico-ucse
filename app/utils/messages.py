@@ -86,9 +86,10 @@ def single_variable(d: dict) -> str:
 
 @error_mapping
 def invalid_interval(d: dict) -> str:
-    return (
-        f"El intervalo debe ser [xi, xd] con xi < xd (recibido {d.get('interval')})."
-    )
+    recibido = d.get("interval")
+    if d.get("field") == "xmin":
+        return f"La escala debe cumplir xmin < xmax (recibido {recibido})."
+    return f"El intervalo debe ser [xi, xd] con xi < xd (recibido {recibido})."
 
 
 @error_mapping

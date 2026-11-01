@@ -4,7 +4,7 @@ from typing import Annotated
 from fastapi import APIRouter, Form, Request
 from fastapi.responses import HTMLResponse
 
-from app.utils.graph import Graph
+from app.utils.graph import MUESTRAS_FUNCION, Grafico
 from app.utils.parser import parse_expression
 from app.utils.templates import load_templates
 from app.utils.exceptions import Error
@@ -102,10 +102,14 @@ async def calcular(
                 )
             )
         
-        ctx["grafico"] = Graph(
+        ctx["grafico"] = Grafico.de_funcion(
             func,
             Interval(input.xmin, input.xmax),
-            resultado.raiz,
+            muestras=MUESTRAS_FUNCION,
+            raiz=resultado.raiz,
+            uno_a_uno=True,
+            titulo_y="f(x)",
+            places=resultado.tolerancia.places,
         )
         
         ctx["resultado"] = resultado

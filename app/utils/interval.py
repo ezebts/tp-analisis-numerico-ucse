@@ -16,3 +16,11 @@ class Interval:
 
     def __str__(self):
         return f"[{self.xi}, {self.xd}]"
+
+
+def intervalo_valido(xi: float, xd: float, campo: str) -> Interval:
+    """Intervalo con xi < xd. El error queda asociado al campo de la UI."""
+    try:
+        return Interval(xi, xd)
+    except ValidationError as exc:
+        raise ValidationError(**{campo: list(exc)}) from exc

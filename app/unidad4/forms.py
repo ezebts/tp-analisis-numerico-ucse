@@ -4,21 +4,23 @@ from pydantic_core import PydanticCustomError
 from app.unidad4.integracion.metodos import MetodoIntegracion, requiere_n
 
 
-class CalcularForm(BaseModel):
+class IntegracionForm(BaseModel):
     funcion: str
     metodo: MetodoIntegracion
     xi: float
     xd: float
+    xmin: float
+    xmax: float
     n: int | None = None
 
-    @field_validator("funcion", "metodo", "xi", "xd", "n", mode="before")
+    @field_validator("funcion", "metodo", "xi", "xd", "xmin", "xmax", "n", mode="before")
     @classmethod
     def normalize(cls, value: object, info: ValidationInfo) -> object:
         if not isinstance(value, str):
             return value
 
         texto = value.strip()
-        if info.field_name in {"xi", "xd", "n"}:
+        if info.field_name in {"xi", "xd", "xmin", "xmax", "n"}:
             texto = texto.replace(",", ".")
 
         if not texto:
@@ -31,6 +33,8 @@ class CalcularForm(BaseModel):
             )
         return texto
 
+
+class CalcularForm(IntegracionForm):
     @field_validator("n")
     @classmethod
     def n_si_el_metodo_lo_pide(cls, value: int | None, info: ValidationInfo) -> int | None:

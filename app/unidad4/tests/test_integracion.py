@@ -2,6 +2,7 @@ from math import log
 
 import pytest
 
+from app.utils.graph import Grafico
 from app.utils.interval import Interval
 from app.utils.parser import parse_expression
 from app.unidad4.exceptions import PocosSubintervalos, SubintervalosImpares
@@ -35,6 +36,27 @@ def test_integral_exacta_del_mockup():
     exacto = integral_exacta(parse_expression("1/x + x"), Interval(0.5, 3.5))
     assert exacto == pytest.approx(log(7) + 6)
     assert round(exacto, 4) == 7.9459
+
+
+def test_grafico_muestrea_la_escala_de_x():
+    func = parse_expression("x^2")
+    resultado = calcular_integral(
+        IntegracionParams(
+            func=func,
+            metodo=MetodoIntegracion.TRAPECIOS_SIMPLE,
+            interval=Interval(0, 2),
+            n=None,
+        )
+    )
+    grafico = Grafico.de_funcion(func, Interval(-2, 4), area=resultado.paneles)
+
+    assert grafico.xmin == -2
+    assert grafico.xmax == 4
+    assert grafico.xs[0] == -2
+    assert grafico.xs[-1] == 4
+    assert grafico.ys[0] == pytest.approx(4)
+    assert grafico.area_xs[0] == 0
+    assert grafico.area_xs[-1] == 2
 
 
 def test_trapecios_simple_ignora_n():

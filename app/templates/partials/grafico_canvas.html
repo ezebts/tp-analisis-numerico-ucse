@@ -1,0 +1,21 @@
+<div
+  data-grafico
+  {% if grafico.uno_a_uno %}data-escala="uno-a-uno"{% elif grafico.misma_escala %}data-escala="igual"{% endif %}
+  {% if grafico.incluye_cero %}data-incluye-cero{% endif %}
+  data-curva="{{ grafico.curva }}"
+  data-titulo-x="{{ grafico.titulo_x }}"
+  data-titulo-y="{{ grafico.titulo_y }}"
+  data-xs="{{ grafico.xs | tojson }}"
+  data-ys="{{ grafico.ys | tojson }}"
+  data-puntos-x="{{ grafico.puntos_x | tojson }}"
+  data-puntos-y="{{ grafico.puntos_y | tojson }}"
+  data-area-xs="{{ grafico.area_xs | tojson }}"
+  data-area-ys="{{ grafico.area_ys | tojson }}"
+  data-raiz="{{ grafico.raiz if grafico.raiz is not none else '' }}"
+  data-xmin="{{ grafico.xmin }}"
+  data-xmax="{{ grafico.xmax }}"
+  {% if grafico.etiqueta_area %}data-area="{{ grafico.etiqueta_area }}"{% endif %}
+  data-places="{{ grafico.places }}"
+>
+  <canvas aria-label="{{ grafico.aria }}"></canvas>
+</div>

@@ -5,11 +5,12 @@ from fastapi import APIRouter, Form, Request
 from fastapi.responses import HTMLResponse
 
 from app.utils.exceptions import Error, ValidationError
-from app.utils.interval import Interval
+from app.utils.graph import Grafico
+from app.utils.interval import intervalo_valido
 from app.utils.parser import parse_expression
-from app.utils.templates import load_templates
+from app.utils.templates import format_decimal, load_templates
 from app.unidad4.exceptions import PocosSubintervalos, SubintervalosImpares
-from app.unidad4.forms import CalcularForm
+from app.unidad4.forms import CalcularForm, IntegracionForm
 from app.unidad4.integracion.metodos import (
     NOMBRES_METODO,
     IntegracionParams,
@@ -17,7 +18,7 @@ from app.unidad4.integracion.metodos import (
     calcular_integral,
     requiere_n,
 )
-from app.unidad4.utils import DECIMALES_AREA, grafico_desde_resultado, integral_exacta
+from app.unidad4.utils import DECIMALES_AREA, integral_exacta
 
 
 logger = getLogger(__name__)
@@ -37,11 +38,13 @@ def _valores_iniciales() -> dict:
         "metodo": MetodoIntegracion.TRAPECIOS_MULTIPLE,
         "xi": "0.5",
         "xd": "3.5",
+        "xmin": "0.5",
+        "xmax": "3.5",
         "n": "10",
     }
 
 
-def _contexto(input: CalcularForm) -> dict:
+def _contexto(input: IntegracionForm) -> dict:
     return {
         "errores": [],
         "resultado": None,
@@ -58,6 +61,8 @@ def _contexto(input: CalcularForm) -> dict:
             "metodo": input.metodo,
             "xi": input.xi,
             "xd": input.xd,
+            "xmin": input.xmin,
+            "xmax": input.xmax,
             "n": "" if input.n is None else input.n,
         },
         "swap_form": True,
@@ -87,7 +92,8 @@ async def calcular(
     ctx = _contexto(input)
     try:
         func = parse_expression(input.funcion)
-        intervalo = Interval(input.xi, input.xd)
+        intervalo = intervalo_valido(input.xi, input.xd, "xi")
+        escala = intervalo_valido(input.xmin, input.xmax, "xmin")
         n = input.n if requiere_n(input.metodo) else None
         resultado = calcular_integral(
             IntegracionParams(
@@ -99,13 +105,46 @@ async def calcular(
         )
         ctx["resultado"] = resultado
         ctx["exacto"] = integral_exacta(func, intervalo)
-        ctx["grafico"] = grafico_desde_resultado(func, resultado)
+        ctx["grafico"] = Grafico.de_funcion(
+            func,
+            escala,
+            misma_escala=True,
+            titulo_y="y",
+            places=DECIMALES_AREA,
+            area=resultado.paneles,
+            etiqueta_area=f"A ≈ {format_decimal(resultado.area, DECIMALES_AREA)}",
+        )
     except (SubintervalosImpares, PocosSubintervalos) as exc:
         ctx["errores"] = ValidationError(n=exc)
     except Error as exc:
         ctx["errores"] = exc
     except Exception as exc:
         logger.exception("Error al calcular la integral")
+        ctx["errores"] = exc
+
+    return view.TemplateResponse(request, "partials/calculo.html", ctx)
+
+
+@router.post("/graficar", response_class=HTMLResponse, name="unidad4_graficar")
+async def graficar(
+    request: Request,
+    input: Annotated[IntegracionForm, Form()],
+):
+    ctx = _contexto(input)
+    try:
+        func = parse_expression(input.funcion)
+        escala = intervalo_valido(input.xmin, input.xmax, "xmin")
+        ctx["grafico"] = Grafico.de_funcion(
+            func,
+            escala,
+            misma_escala=True,
+            titulo_y="y",
+            places=DECIMALES_AREA,
+        )
+    except Error as exc:
+        ctx["errores"] = exc
+    except Exception as exc:
+        logger.exception("Error al graficar la función")
         ctx["errores"] = exc
 
     return view.TemplateResponse(request, "partials/calculo.html", ctx)
