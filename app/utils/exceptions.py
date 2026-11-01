@@ -24,6 +24,20 @@ class Error(Exception):
         yield self
 
 
+class NoEsPolinomio(Error):
+    """La expresión no es un polinomio en x."""
+
+    def __init__(self, value: str = ""):
+        super().__init__(value=value)
+
+
+class GradoExcedido(Error):
+    """El polinomio supera el grado pedido."""
+
+    def __init__(self, grado: int, value: str = ""):
+        super().__init__(grado=grado, value=value)
+
+
 class ValidationError(Error, ValueError):
     """
     Excepción lanzada cuando los datos de entrada no son válidos.

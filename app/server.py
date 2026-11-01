@@ -8,12 +8,14 @@ from app.utils.handlers import request_validation_handler
 from app.utils.templates import load_templates
 from app.unidad1.views import router as unidad1_router
 from app.unidad2.views import router as unidad2_router
+from app.unidad3.views import router as unidad3_router
 
 
 app = FastAPI(title="Métodos Numéricos UCSE")
 
 app.include_router(unidad1_router)
 app.include_router(unidad2_router)
+app.include_router(unidad3_router)
 app.add_exception_handler(RequestValidationError, request_validation_handler)
 app.mount("/static", StaticFiles(directory=STATIC_DIR), name="static")
 

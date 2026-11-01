@@ -1,0 +1,36 @@
+{% if resultado %}
+<dl class="space-y-3 text-sm">
+  <div>
+    <dt class="text-slate-500">Función obtenida</dt>
+    <dd class="mt-1 rounded-md border border-slate-200 bg-slate-50 px-3 py-2 text-slate-900">{{ resultado.funcion }}</dd>
+  </div>
+  <div>
+    <dt class="text-slate-500">Correlación (r)</dt>
+    <dd class="mt-1 rounded-md border border-slate-200 bg-slate-50 px-3 py-2 text-slate-900">{{ resultado.r | format_decimal(2) }}%</dd>
+  </div>
+  <div>
+    <dt class="text-slate-500">Efectividad del ajuste</dt>
+    <dd class="mt-1 rounded-md border px-3 py-2 {% if resultado.aceptable %}border-slate-200 bg-slate-50 text-slate-900{% else %}border-amber-200 bg-amber-50 text-amber-800{% endif %}">
+      {% if resultado.aceptable %}El ajuste es aceptable.{% else %}El ajuste no es aceptable.{% endif %}
+    </dd>
+  </div>
+</dl>
+
+<div class="mt-4 flex flex-col gap-4 sm:flex-row sm:items-stretch">
+  <div class="shrink-0 sm:w-40">
+    <p class="text-xs font-medium text-slate-500">Puntos ingresados</p>
+    <ul class="mt-2 space-y-1 text-sm text-slate-800">
+      {% for x, y in resultado.puntos %}
+      <li>P{{ loop.index }} ({{ x | format_decimal }}, {{ y | format_decimal }})</li>
+      {% endfor %}
+    </ul>
+  </div>
+  <div class="relative h-72 min-h-72 w-full min-w-0 sm:flex-1">
+    {% include "partials/grafico.html" %}
+  </div>
+</div>
+
+{% include "partials/modificacion.html" %}
+{% else %}
+<p class="text-sm text-slate-500">Los resultados aparecerán al calcular.</p>
+{% endif %}

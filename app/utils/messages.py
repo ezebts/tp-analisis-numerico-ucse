@@ -6,6 +6,10 @@ def required(d: dict) -> str:
     field = d.get("field")
     if field == "matriz":
         return "Complete todos los coeficientes de la matriz."
+    if field in {"xs", "ys", "puntos"}:
+        return "Complete las coordenadas de todos los puntos."
+    if field == "funcion_modificada":
+        return "Ingrese la función. Ejemplo: y = 2.5x - 1.3."
     return f"Complete el campo {field}." if field else "Complete todos los campos."
 
 
@@ -21,6 +25,8 @@ def invalid_number(d: dict) -> str:
     
     if field == "matriz":
         field = "la matriz"
+    elif field in {"xs", "ys", "puntos"}:
+        field = "los puntos"
 
     if not field:
         return "Ingrese un número válido."
@@ -31,13 +37,31 @@ def invalid_number(d: dict) -> str:
 
 
 @error_mapping
+def NoEsPolinomio(_d: dict) -> str:
+    return "Se espera un polinomio en x. Ejemplo: y = 2.5x - 1.3."
+
+
+@error_mapping
+def GradoExcedido(d: dict) -> str:
+    grado = d.get("grado")
+    if grado == 1:
+        return "Se espera una recta (grado 1). Ejemplo: y = 2.5x - 1.3."
+    return f"Se espera un polinomio de grado a lo sumo {grado}."
+
+
+@error_mapping
 def invalid_function(d: dict) -> str:
     value = d.get("value")
     extra = f' "{value}"' if value else ""
-    
+    ejemplo = (
+        "y = 2.5x - 1.3"
+        if d.get("field") == "funcion_modificada"
+        else "x^2 - 2"
+    )
+
     return (
         f"No se pudo interpretar la función{extra}. "
-        "Use una expresión en x, por ejemplo x^2 - 2."
+        f"Use una expresión en x, por ejemplo {ejemplo}."
     )
 
 
