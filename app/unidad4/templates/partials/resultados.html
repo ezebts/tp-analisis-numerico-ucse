@@ -1,0 +1,18 @@
+{% if resultado %}
+<dl class="space-y-3 text-sm">
+  <div>
+    <dt class="text-slate-500">Área aproximada</dt>
+    <dd class="mt-1 rounded-md border border-slate-200 bg-slate-50 px-3 py-2 text-slate-900">{{ resultado.area | format_decimal(decimales) }}</dd>
+  </div>
+  <div>
+    <dt class="text-slate-500">Estado</dt>
+    <dd class="mt-1 rounded-md border border-slate-200 bg-slate-50 px-3 py-2 text-slate-900">Exitosa</dd>
+  </div>
+  <div>
+    <dt class="text-slate-500">Método utilizado</dt>
+    <dd class="mt-1 rounded-md border border-slate-200 bg-slate-50 px-3 py-2 text-slate-900">{{ nombres[resultado.metodo.value] }}</dd>
+  </div>
+</dl>
+{% else %}
+<p class="text-sm text-slate-500">Los resultados aparecerán al calcular.</p>
+{% endif %}

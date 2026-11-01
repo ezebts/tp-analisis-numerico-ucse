@@ -10,7 +10,8 @@ from app.utils.templates import load_templates
 from app.utils.exceptions import Error
 
 from app.unidad1.forms import CalcularForm, MetodoAbierto, MetodoCerrado
-from app.unidad1.utils import Interval, Tolerance
+from app.utils.interval import Interval
+from app.unidad1.utils import Tolerance
 
 from app.unidad1.raices_de_funciones.metodos_abiertos import (
     MetodoAbiertoParams,

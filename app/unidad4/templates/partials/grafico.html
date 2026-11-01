@@ -1,0 +1,27 @@
+{% if grafico %}
+<div class="space-y-3">
+  <div class="space-y-1 font-mono text-sm text-slate-700">
+    <p>f(x) = {{ funcion }}</p>
+    <p>
+      ∫<sub>{{ resultado.interval.xi | format_decimal(decimales) }}</sub><sup>{{ resultado.interval.xd | format_decimal(decimales) }}</sup>
+      f(x) dx
+      {% if exacto is not none %}≈ {{ exacto | format_decimal(decimales) }}{% endif %}
+    </p>
+  </div>
+  <div class="relative h-72 min-h-72 w-full">
+    <div
+      data-grafico
+      data-xs="{{ grafico.xs | tojson }}"
+      data-ys="{{ grafico.ys | tojson }}"
+      data-area-xs="{{ grafico.area_xs | tojson }}"
+      data-area-ys="{{ grafico.area_ys | tojson }}"
+      data-area="A ≈ {{ resultado.area | format_decimal(decimales) }}"
+      data-places="{{ decimales }}"
+    >
+      <canvas aria-label="Gráfico de la función y el área"></canvas>
+    </div>
+  </div>
+</div>
+{% else %}
+<p class="text-sm text-slate-500">El gráfico aparecerá al calcular.</p>
+{% endif %}

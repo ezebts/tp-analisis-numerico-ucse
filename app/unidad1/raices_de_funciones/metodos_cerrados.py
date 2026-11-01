@@ -10,7 +10,8 @@ from sympy import Expr, lambdify, symbols
 
 from app.utils.math import evalr
 from app.utils.exceptions import ValidationError, Error
-from app.unidad1.utils import Interval, Tolerance
+from app.utils.interval import Interval
+from app.unidad1.utils import Tolerance
 from app.unidad1.exceptions import IntervalDoesntCrossZero
 
 

@@ -1,0 +1,100 @@
+{% macro fila(slot, fields) %}
+<div>
+  {{ caller() }}
+  <div id="errores-{{ slot }}" class="empty:hidden">{% with fields=fields %}{% include "partials/errores_campos.html" %}{% endwith %}</div>
+</div>
+{% endmacro %}
+
+<form
+  id="formulario"
+  class="mt-4 space-y-4"
+  hx-post="{{ url_for('unidad4_calcular') }}"
+  hx-swap="none"
+  hx-indicator="#indicador-calculo"
+  data-metodos-con-n="{{ metodos_con_n | join(',') }}"
+  {% if swap_form %}hx-swap-oob="outerHTML"{% endif %}
+>
+  {% call fila("metodo", ["metodo"]) %}
+  <label class="block">
+    <span class="text-sm font-medium text-slate-700">Método</span>
+    <select
+      name="metodo"
+      class="mt-1 w-full rounded-md border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+    >
+      {% for metodo in metodos %}
+      <option value="{{ metodo.value }}" {% if valores.metodo == metodo %}selected{% endif %}>{{ nombres[metodo.value] }}</option>
+      {% endfor %}
+    </select>
+    <span class="mt-1 block text-xs text-slate-500">Método de integración numérica</span>
+  </label>
+  {% endcall %}
+
+  {% call fila("funcion", ["funcion"]) %}
+  <label class="block">
+    <span class="text-sm font-medium text-slate-700">Función</span>
+    <input
+      name="funcion"
+      value="{{ valores.funcion }}"
+      required
+      class="mt-1 w-full rounded-md border border-slate-300 px-3 py-2 text-sm text-slate-900 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+    />
+  </label>
+  {% endcall %}
+
+  {% call fila("intervalo", ["xi", "xd"]) %}
+  <fieldset>
+    <legend class="text-sm font-medium text-slate-700">Intervalo</legend>
+    <div class="mt-1 grid grid-cols-1 gap-3">
+      <label class="block">
+        <span class="text-xs text-slate-500">Extremo izquierdo (xi)</span>
+        <input
+          name="xi"
+          value="{{ valores.xi }}"
+          required
+          class="mt-1 w-full rounded-md border border-slate-300 px-3 py-2 text-sm text-slate-900 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+        />
+      </label>
+      <label class="block">
+        <span class="text-xs text-slate-500">Extremo derecho (xd)</span>
+        <input
+          name="xd"
+          value="{{ valores.xd }}"
+          required
+          class="mt-1 w-full rounded-md border border-slate-300 px-3 py-2 text-sm text-slate-900 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+        />
+      </label>
+    </div>
+  </fieldset>
+  {% endcall %}
+
+  {% call fila("subintervalos", ["n"]) %}
+  <label class="block" data-campo-n {% if valores.metodo.value not in metodos_con_n %}hidden{% endif %}>
+    <span class="text-sm font-medium text-slate-700">Subintervalos (n)</span>
+    <input
+      name="n"
+      value="{{ valores.n }}"
+      {% if valores.metodo.value in metodos_con_n %}required{% endif %}
+      class="mt-1 w-full rounded-md border border-slate-300 px-3 py-2 text-sm text-slate-900 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+    />
+  </label>
+  {% endcall %}
+
+  <div id="errores-form" class="empty:hidden">
+    {% set general = (errores | default(none)) | all_errors %}
+    {% if general %}
+    <div class="space-y-2">
+      {% for error in general %}
+      <p class="rounded-md border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-700" role="alert">{{ error | error_message }}</p>
+      {% endfor %}
+    </div>
+    {% endif %}
+  </div>
+
+  <button
+    type="submit"
+    class="relative flex w-full items-center justify-center rounded-md bg-blue-600 px-4 py-2.5 text-sm font-medium text-white transition hover:bg-blue-700 disabled:opacity-60"
+  >
+    <span>Calcular área</span>
+    <span id="indicador-calculo" class="htmx-indicator pointer-events-none absolute inset-y-0 right-4 flex items-center text-blue-100">Calculando…</span>
+  </button>
+</form>

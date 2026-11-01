@@ -1,5 +1,5 @@
 from app.utils.exceptions import Error
-from app.unidad1.utils import Interval
+from app.utils.interval import Interval
 
 
 class IntervalDoesntCrossZero(Error):

@@ -2,13 +2,6 @@ from app.utils.templates import error_mapping
 
 
 @error_mapping
-def invalid_interval(d: dict) -> str:
-    return (
-        f"El intervalo debe ser [xi, xd] con xi < xd (recibido {d.get('interval')})."
-    )
-
-
-@error_mapping
 def out_of_range(d: dict) -> str:
     field = d.get("field")
     if field == "dimension":

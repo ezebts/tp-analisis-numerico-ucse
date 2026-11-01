@@ -4,7 +4,8 @@ import pytest
 
 from app.utils.math import ImageNotReal
 from app.utils.parser import parse_expression
-from app.unidad1.utils import Interval, Tolerance
+from app.utils.interval import Interval
+from app.unidad1.utils import Tolerance
 from app.unidad1.raices_de_funciones.metodos_cerrados import (
     MetodoCerrado,
     MetodoCerradoParams,
